@@ -6,12 +6,14 @@ const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
 // ── Static data ──
+// Fase de Grupos: 2 semanas (weekends de 3-4 Jul e 10-11 Jul)
+// Só sextas 18h-00h e sábados 09h-00h
 
 const templates = [
-    { name: "NOCTURNO (SEX/SÁB)",      j1: "03 Jul, 19:00", j2: "10 Jul, 20:30", j3: "19 Jul, 10:00" },
-    { name: "MATINAL (SÁB/DOM)",        j1: "04 Jul, 10:00", j2: "11 Jul, 11:30", j3: "19 Jul, 11:30" },
-    { name: "AFTER-WORK (SEG/QUA)",     j1: "06 Jul, 19:30", j2: "13 Jul, 19:30", j3: "19 Jul, 13:00" },
-    { name: "WEEKEND PRIME (SÁB/DOM)",  j1: "04 Jul, 16:00", j2: "11 Jul, 17:30", j3: "19 Jul, 14:30" }
+    { name: "NOCTURNO (SEX)",  j1: "Sex. 03 Jul, 20:00", j2: "Sex. 10 Jul, 20:00", j3: "Sex. 10 Jul, 22:00" },
+    { name: "MATINAL (SÁB)",   j1: "Sáb. 04 Jul, 09:00", j2: "Sáb. 11 Jul, 09:00", j3: "Sáb. 11 Jul, 11:00" },
+    { name: "TARDE (SÁB)",     j1: "Sáb. 04 Jul, 15:00", j2: "Sex. 10 Jul, 18:00", j3: "Sáb. 11 Jul, 15:00" },
+    { name: "MISTO (SEX/SÁB)", j1: "Sex. 03 Jul, 18:00", j2: "Sáb. 04 Jul, 12:00", j3: "Sex. 10 Jul, 21:00" }
 ];
 
 const poteConfigs = [
@@ -23,9 +25,7 @@ const poteConfigs = [
 
 // ── Firebase helpers ──
 
-function dbKey(group, pote) {
-    return `${group}_${pote}`;
-}
+function dbKey(group, pote) { return `${group}_${pote}`; }
 
 function writeVaga(group, pote, data) {
     return set(ref(db, `vagas/${dbKey(group, pote)}`), data);
@@ -44,7 +44,7 @@ function esc(str) {
         .replace(/>/g, '&gt;');
 }
 
-// ── HTML generation (all rows start as open; onValue sets real state) ──
+// ── HTML generation ──
 
 function buildPoteRow(groupLetter, pote, campos, template) {
     return `
@@ -66,7 +66,10 @@ function buildPoteRow(groupLetter, pote, campos, template) {
                         <em>SIMULTÂNEO</em>
                     </div>
                 </div>
-                <button class="btn-toggle">Fechar Vaga</button>
+                <div class="btn-group">
+                    <button class="btn-toggle">Fechar Vaga</button>
+                    <button class="btn-edit hidden">Editar</button>
+                </div>
             </div>
             <div class="vaga-form hidden">
                 <input class="vaga-input" type="text" placeholder="Jogador 1" autocomplete="off" />
@@ -110,19 +113,23 @@ function buildGroupCard(groupLetter, offset, templateIndex) {
 
 function applyRowState(row, data) {
     const btn     = row.querySelector('.btn-toggle');
+    const editBtn = row.querySelector('.btn-edit');
     const overlay = row.querySelector('.vaga-overlay');
     const isClosed = data !== null;
 
     row.classList.toggle('closed', isClosed);
     btn.textContent = isClosed ? 'Abrir Vaga' : 'Fechar Vaga';
     btn.classList.toggle('closed-btn', isClosed);
+    editBtn.classList.toggle('hidden', !isClosed);
 
     if (isClosed) {
+        row.dataset.vagaData = JSON.stringify(data);
         overlay.innerHTML = `
             <div class="overlay-names">${esc(data.jogador1)} &amp; ${esc(data.jogador2)}</div>
             <div class="overlay-contact">${esc(data.contacto)}</div>`;
         overlay.classList.remove('hidden');
     } else {
+        delete row.dataset.vagaData;
         overlay.innerHTML = '';
         overlay.classList.add('hidden');
         row.querySelector('.vaga-form').classList.add('hidden');
@@ -141,6 +148,22 @@ function watchVagas() {
 
 // ── Event handling ──
 
+function openForm(row, prefill = null) {
+    const form   = row.querySelector('.vaga-form');
+    const inputs = row.querySelectorAll('.vaga-input');
+
+    if (prefill) {
+        inputs[0].value = prefill.jogador1 || '';
+        inputs[1].value = prefill.jogador2 || '';
+        inputs[2].value = prefill.contacto || '';
+    } else {
+        inputs.forEach(i => (i.value = ''));
+    }
+
+    form.classList.remove('hidden');
+    inputs[0].focus();
+}
+
 function confirmForm(row) {
     const inputs   = row.querySelectorAll('.vaga-input');
     const jogador1 = inputs[0].value.trim();
@@ -155,7 +178,6 @@ function confirmForm(row) {
     inputs.forEach(i => (i.value = ''));
 
     writeVaga(group, pote, { jogador1, jogador2, contacto });
-    // onValue listener handles the visual update automatically
 }
 
 function attachListeners() {
@@ -171,7 +193,15 @@ function attachListeners() {
 
             const form = row.querySelector('.vaga-form');
             const isHidden = form.classList.toggle('hidden');
-            if (!isHidden) form.querySelector('.vaga-input').focus();
+            if (!isHidden) openForm(row);
+        });
+    });
+
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = btn.closest('.pote-row');
+            const data = row.dataset.vagaData ? JSON.parse(row.dataset.vagaData) : null;
+            openForm(row, data);
         });
     });
 
