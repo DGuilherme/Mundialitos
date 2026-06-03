@@ -135,10 +135,70 @@ body {
     padding-bottom: 10px;
 }
 
+.group-title-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .template-name {
     font-size: 0.6rem;
     color: var(--neon);
     opacity: 0.6;
+}
+
+.btn-edit-schedule {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-size: 0.6rem;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.btn-edit-schedule:hover { border-color: var(--neon); color: var(--neon); }
+
+/* ── Schedule edit form (admin) ── */
+
+.schedule-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.schedule-form.hidden { display: none; }
+
+.schedule-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.schedule-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.schedule-field label {
+    font-size: 0.65rem;
+    color: var(--neon);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* ── Pote Row ── */
