@@ -29,6 +29,39 @@ body {
     padding-bottom: 20px;
 }
 
+.admin-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.admin-badge {
+    background: var(--neon);
+    color: black;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 2px;
+}
+
+.admin-logout {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-size: 0.65rem;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.admin-logout:hover { border-color: var(--gray); color: var(--white); }
+
 .page-header h1 {
     font-family: 'Syncopate', sans-serif;
     font-size: clamp(1.5rem, 5vw, 2.5rem);

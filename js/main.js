@@ -228,6 +228,25 @@ function attachListeners() {
     });
 }
 
+// ── Admin bar ──
+
+function renderAdminBar() {
+    const bar = document.getElementById('admin-bar');
+    if (!bar) return;
+
+    if (isAdmin) {
+        bar.innerHTML = `
+            <div class="admin-bar">
+                <span class="admin-badge">ADMIN</span>
+                <button class="admin-logout" id="btn-logout">Sair</button>
+            </div>`;
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            sessionStorage.removeItem('mundialitos_admin');
+            window.location.reload();
+        });
+    }
+}
+
 // ── Bootstrap ──
 
 async function init() {
@@ -242,6 +261,7 @@ async function init() {
         });
     });
 
+    renderAdminBar();
     attachListeners();
     watchVagas();
 }
