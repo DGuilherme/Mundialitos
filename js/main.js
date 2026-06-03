@@ -1,3 +1,12 @@
+import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+import { getDatabase, ref, set, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js';
+import { firebaseConfig }                          from './firebase-config.js';
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ── Static data ──
+
 const templates = [
     { name: "NOCTURNO (SEX/SÁB)",      j1: "03 Jul, 19:00", j2: "10 Jul, 20:30", j3: "19 Jul, 10:00" },
     { name: "MATINAL (SÁB/DOM)",        j1: "04 Jul, 10:00", j2: "11 Jul, 11:30", j3: "19 Jul, 11:30" },
@@ -12,25 +21,21 @@ const poteConfigs = [
     { label: "POTE 4",        num: 4 }
 ];
 
-// ── localStorage ──
+// ── Firebase helpers ──
 
-function storageKey(group, pote) {
-    return `vaga_${group}_pote${pote}`;
+function dbKey(group, pote) {
+    return `${group}_${pote}`;
 }
 
-function loadVaga(group, pote) {
-    const raw = localStorage.getItem(storageKey(group, pote));
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
+function writeVaga(group, pote, data) {
+    return set(ref(db, `vagas/${dbKey(group, pote)}`), data);
 }
 
-function saveVaga(group, pote, data) {
-    localStorage.setItem(storageKey(group, pote), JSON.stringify(data));
+function deleteVaga(group, pote) {
+    return remove(ref(db, `vagas/${dbKey(group, pote)}`));
 }
 
-function clearVaga(group, pote) {
-    localStorage.removeItem(storageKey(group, pote));
-}
+// ── Utils ──
 
 function esc(str) {
     return String(str)
@@ -39,20 +44,11 @@ function esc(str) {
         .replace(/>/g, '&gt;');
 }
 
-// ── HTML generation ──
-
-function buildOverlayContent(data) {
-    return `
-        <div class="overlay-names">${esc(data.jogador1)} &amp; ${esc(data.jogador2)}</div>
-        <div class="overlay-contact">${esc(data.contacto)}</div>`;
-}
+// ── HTML generation (all rows start as open; onValue sets real state) ──
 
 function buildPoteRow(groupLetter, pote, campos, template) {
-    const data = loadVaga(groupLetter, pote.num);
-    const closed = data !== null;
-
     return `
-        <div class="pote-row${closed ? ' closed' : ''}">
+        <div class="pote-row" data-group="${groupLetter}" data-pote="${pote.num}">
             <div class="pote-main">
                 <div class="pote-header">${pote.label}</div>
                 <div class="games-container">
@@ -70,32 +66,24 @@ function buildPoteRow(groupLetter, pote, campos, template) {
                         <em>SIMULTÂNEO</em>
                     </div>
                 </div>
-                <button class="btn-toggle${closed ? ' closed-btn' : ''}"
-                        data-group="${groupLetter}"
-                        data-pote="${pote.num}">
-                    ${closed ? 'Abrir Vaga' : 'Fechar Vaga'}
-                </button>
+                <button class="btn-toggle">Fechar Vaga</button>
             </div>
             <div class="vaga-form hidden">
                 <input class="vaga-input" type="text" placeholder="Jogador 1" autocomplete="off" />
                 <input class="vaga-input" type="text" placeholder="Jogador 2" autocomplete="off" />
-                <input class="vaga-input" type="text" placeholder="Contacto" autocomplete="off" />
+                <input class="vaga-input" type="text" placeholder="Contacto"  autocomplete="off" />
                 <div class="form-actions">
                     <button class="btn-confirm">Confirmar</button>
                     <button class="btn-cancel">Cancelar</button>
                 </div>
             </div>
-            <div class="vaga-overlay${closed ? '' : ' hidden'}">
-                ${closed ? buildOverlayContent(data) : ''}
-            </div>
+            <div class="vaga-overlay hidden"></div>
         </div>`;
 }
 
 function buildGroupCard(groupLetter, offset, templateIndex) {
     const template = templates[templateIndex];
-    const f1 = 1 + offset;
-    const f2 = 2 + offset;
-    const f3 = 3 + offset;
+    const f1 = 1 + offset, f2 = 2 + offset, f3 = 3 + offset;
 
     const camposPorPote = [
         { c1: f1, c2: f2, c3: f1 },
@@ -118,46 +106,69 @@ function buildGroupCard(groupLetter, offset, templateIndex) {
         </div>`;
 }
 
-// ── State transitions ──
+// ── Real-time state sync ──
 
-function applyClose(row, btn, group, pote, data) {
-    row.classList.add('closed');
-    btn.textContent = 'Abrir Vaga';
-    btn.classList.add('closed-btn');
-
+function applyRowState(row, data) {
+    const btn     = row.querySelector('.btn-toggle');
     const overlay = row.querySelector('.vaga-overlay');
-    overlay.innerHTML = buildOverlayContent(data);
-    overlay.classList.remove('hidden');
+    const isClosed = data !== null;
 
-    saveVaga(group, pote, data);
+    row.classList.toggle('closed', isClosed);
+    btn.textContent = isClosed ? 'Abrir Vaga' : 'Fechar Vaga';
+    btn.classList.toggle('closed-btn', isClosed);
+
+    if (isClosed) {
+        overlay.innerHTML = `
+            <div class="overlay-names">${esc(data.jogador1)} &amp; ${esc(data.jogador2)}</div>
+            <div class="overlay-contact">${esc(data.contacto)}</div>`;
+        overlay.classList.remove('hidden');
+    } else {
+        overlay.innerHTML = '';
+        overlay.classList.add('hidden');
+        row.querySelector('.vaga-form').classList.add('hidden');
+    }
 }
 
-function applyOpen(row, btn, group, pote) {
-    row.classList.remove('closed');
-    btn.textContent = 'Fechar Vaga';
-    btn.classList.remove('closed-btn');
-
-    const overlay = row.querySelector('.vaga-overlay');
-    overlay.classList.add('hidden');
-    overlay.innerHTML = '';
-
-    clearVaga(group, pote);
+function watchVagas() {
+    onValue(ref(db, 'vagas'), snapshot => {
+        const vagas = snapshot.val() || {};
+        document.querySelectorAll('.pote-row').forEach(row => {
+            const { group, pote } = row.dataset;
+            applyRowState(row, vagas[dbKey(group, pote)] ?? null);
+        });
+    });
 }
 
-// ── Event listeners ──
+// ── Event handling ──
+
+function confirmForm(row) {
+    const inputs   = row.querySelectorAll('.vaga-input');
+    const jogador1 = inputs[0].value.trim();
+    const jogador2 = inputs[1].value.trim();
+    const contacto = inputs[2].value.trim();
+
+    if (!jogador1) { inputs[0].focus(); return; }
+    if (!jogador2) { inputs[1].focus(); return; }
+
+    const { group, pote } = row.dataset;
+    row.querySelector('.vaga-form').classList.add('hidden');
+    inputs.forEach(i => (i.value = ''));
+
+    writeVaga(group, pote, { jogador1, jogador2, contacto });
+    // onValue listener handles the visual update automatically
+}
 
 function attachListeners() {
     document.querySelectorAll('.btn-toggle').forEach(btn => {
         btn.addEventListener('click', () => {
             const row = btn.closest('.pote-row');
-            const { group, pote } = btn.dataset;
+            const { group, pote } = row.dataset;
 
             if (row.classList.contains('closed')) {
-                applyOpen(row, btn, group, pote);
+                deleteVaga(group, pote);
                 return;
             }
 
-            // Toggle inline form
             const form = row.querySelector('.vaga-form');
             const isHidden = form.classList.toggle('hidden');
             if (!isHidden) form.querySelector('.vaga-input').focus();
@@ -168,7 +179,6 @@ function attachListeners() {
         btn.addEventListener('click', () => confirmForm(btn.closest('.pote-row')));
     });
 
-    // Submit on Enter from any input
     document.querySelectorAll('.vaga-form').forEach(form => {
         form.querySelectorAll('.vaga-input').forEach(input => {
             input.addEventListener('keydown', e => {
@@ -186,23 +196,6 @@ function attachListeners() {
     });
 }
 
-function confirmForm(row) {
-    const toggleBtn = row.querySelector('.btn-toggle');
-    const { group, pote } = toggleBtn.dataset;
-    const inputs = row.querySelectorAll('.vaga-input');
-    const jogador1 = inputs[0].value.trim();
-    const jogador2 = inputs[1].value.trim();
-    const contacto = inputs[2].value.trim();
-
-    if (!jogador1) { inputs[0].focus(); return; }
-    if (!jogador2) { inputs[1].focus(); return; }
-
-    row.querySelector('.vaga-form').classList.add('hidden');
-    inputs.forEach(i => (i.value = ''));
-
-    applyClose(row, toggleBtn, group, pote, { jogador1, jogador2, contacto });
-}
-
 // ── Bootstrap ──
 
 async function init() {
@@ -218,6 +211,7 @@ async function init() {
     });
 
     attachListeners();
+    watchVagas();
 }
 
 init();
