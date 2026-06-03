@@ -71,7 +71,6 @@ function buildPoteRow(groupLetter, pote, campos, template) {
                     <div class="game-box">
                         <span data-group="${groupLetter}" data-jornada="j3">J3: ${template.j3}</span>
                         <strong>Campo ${campos.c3}</strong>
-                        <em>SIMULTÂNEO</em>
                     </div>
                 </div>
                 <div class="btn-group">

@@ -421,6 +421,80 @@ body {
 .btn-edit:hover { border-color: var(--gray); color: var(--white); }
 .btn-edit.hidden { display: none; }
 
+/* ── Fases Eliminatórias ── */
+
+.phases-section {
+    margin-top: 50px;
+    border-top: 1px solid var(--border);
+    padding-top: 30px;
+}
+
+.phases-title {
+    font-family: 'Syncopate', sans-serif;
+    font-size: clamp(0.8rem, 3vw, 1rem);
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.phase-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.phase-tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--gray);
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(0.6rem, 2vw, 0.75rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+}
+
+.phase-tab:hover { color: var(--white); }
+
+.phase-tab.active {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--neon);
+    border-bottom-color: var(--card);
+}
+
+.phase-panels {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 30px 25px;
+}
+
+.phase-panel { display: none; }
+.phase-panel.active { display: block; }
+
+.phase-dates {
+    font-family: 'Syncopate', sans-serif;
+    font-size: clamp(1.4rem, 5vw, 2.2rem);
+    color: var(--neon);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.phase-desc {
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
 @media print {
     body { padding: 40px; background: black !important; }
     .grid { grid-template-columns: repeat(2, 1fr) !important; display: grid !important; }

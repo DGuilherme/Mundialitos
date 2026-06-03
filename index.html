@@ -24,6 +24,39 @@
         <div class="grid" id="grid-b"></div>
     </div>
 
+    <div class="phases-section">
+        <div class="phases-title">FASES ELIMINATÓRIAS</div>
+        <div class="phase-tabs" id="phaseTabs">
+            <button class="phase-tab active" data-target="phase-knockout">16AVOS &amp; 8AVOS</button>
+            <button class="phase-tab" data-target="phase-semis">MEIAS FINAIS</button>
+            <button class="phase-tab" data-target="phase-final">FINAL</button>
+        </div>
+        <div class="phase-panels">
+            <div class="phase-panel active" id="phase-knockout">
+                <div class="phase-dates">18 — 24 JULHO</div>
+                <div class="phase-desc">16 Avos e Oitavos de Final &bull; Sextas e Sábados</div>
+            </div>
+            <div class="phase-panel" id="phase-semis">
+                <div class="phase-dates">25 — 30 JULHO</div>
+                <div class="phase-desc">Meias Finais &bull; Sextas e Sábados</div>
+            </div>
+            <div class="phase-panel" id="phase-final">
+                <div class="phase-dates">1 AGOSTO</div>
+                <div class="phase-desc">Grande Final</div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/main.js" type="module"></script>
+    <script>
+        document.getElementById('phaseTabs').addEventListener('click', function(e) {
+            var tab = e.target.closest('.phase-tab');
+            if (!tab) return;
+            document.querySelectorAll('.phase-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.phase-panel').forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
+        });
+    </script>
 </body>
 </html>
