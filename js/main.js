@@ -2,8 +2,9 @@ import { initializeApp }                          from 'https://www.gstatic.com/
 import { getDatabase, ref, set, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js';
 import { firebaseConfig }                          from './firebase-config.js';
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+const app     = initializeApp(firebaseConfig);
+const db      = getDatabase(app);
+const isAdmin = sessionStorage.getItem('mundialitos_admin') === '1';
 
 // ── Static data ──
 // Fase de Grupos: 2 semanas (weekends de 3-4 Jul e 10-11 Jul)
@@ -68,7 +69,7 @@ function buildPoteRow(groupLetter, pote, campos, template) {
                 </div>
                 <div class="btn-group">
                     <button class="btn-toggle">Fechar Vaga</button>
-                    <button class="btn-edit hidden">Editar</button>
+                    ${isAdmin ? '<button class="btn-edit hidden">Editar</button>' : ''}
                 </div>
             </div>
             <div class="vaga-form hidden">
@@ -118,9 +119,10 @@ function applyRowState(row, data) {
     const isClosed = data !== null;
 
     row.classList.toggle('closed', isClosed);
-    btn.textContent = isClosed ? 'Abrir Vaga' : 'Fechar Vaga';
+    btn.textContent = isClosed ? (isAdmin ? 'Abrir Vaga' : 'Vaga Ocupada') : 'Fechar Vaga';
     btn.classList.toggle('closed-btn', isClosed);
-    editBtn.classList.toggle('hidden', !isClosed);
+    btn.disabled = isClosed && !isAdmin;
+    if (editBtn) editBtn.classList.toggle('hidden', !isClosed);
 
     if (isClosed) {
         row.dataset.vagaData = JSON.stringify(data);
@@ -187,7 +189,7 @@ function attachListeners() {
             const { group, pote } = row.dataset;
 
             if (row.classList.contains('closed')) {
-                deleteVaga(group, pote);
+                if (isAdmin) deleteVaga(group, pote);
                 return;
             }
 
@@ -197,7 +199,7 @@ function attachListeners() {
         });
     });
 
-    document.querySelectorAll('.btn-edit').forEach(btn => {
+    document.querySelectorAll('.btn-edit').forEach(btn => { if (!isAdmin) return;
         btn.addEventListener('click', () => {
             const row = btn.closest('.pote-row');
             const data = row.dataset.vagaData ? JSON.parse(row.dataset.vagaData) : null;

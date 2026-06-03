@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — MUNDIALITO PADEL 2026</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-box h1 {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1rem;
+            color: var(--neon);
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .login-box p {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            color: var(--white);
+            padding: 12px 14px;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            letter-spacing: 2px;
+        }
+
+        .login-input:focus { border-color: var(--neon); }
+
+        .login-btn {
+            width: 100%;
+            background: var(--neon);
+            color: black;
+            border: none;
+            padding: 12px;
+            font-weight: 900;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 1px;
+            transition: background 0.15s;
+        }
+
+        .login-btn:hover { background: #d9ff33; }
+        .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .error-msg {
+            font-size: 0.75rem;
+            color: var(--closed-red);
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>MUNDIALITO 2026</h1>
+        <p>Acesso Administrador</p>
+        <input class="login-input" id="pwd" type="password" placeholder="Password" autocomplete="current-password" />
+        <button class="login-btn" id="btn">Entrar</button>
+        <span class="error-msg" id="err">Password incorrecta.</span>
+    </div>
+
+    <script>
+        const input = document.getElementById('pwd');
+        const btn   = document.getElementById('btn');
+        const err   = document.getElementById('err');
+
+        async function login() {
+            const password = input.value;
+            if (!password) return;
+
+            btn.disabled = true;
+            err.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/verify-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                if (res.ok) {
+                    sessionStorage.setItem('mundialitos_admin', '1');
+                    window.location.href = '/';
+                } else {
+                    err.style.display = 'block';
+                    input.value = '';
+                    input.focus();
+                }
+            } catch {
+                err.textContent = 'Erro de ligação. Tenta novamente.';
+                err.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        btn.addEventListener('click', login);
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+        input.focus();
+    </script>
+</body>
+</html>
