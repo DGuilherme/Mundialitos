@@ -18,10 +18,10 @@ const templates = [
 ];
 
 const poteConfigs = [
-    { label: "POTE 1 (C.S.)", num: 1 },
-    { label: "POTE 2",        num: 2 },
-    { label: "POTE 3",        num: 3 },
-    { label: "POTE 4",        num: 4 }
+    { label: "M3", num: 1, nivel: "M3" },
+    { label: "M4", num: 2, nivel: "M4" },
+    { label: "M5", num: 3, nivel: "M5" },
+    { label: "M6", num: 4, nivel: "M6" }
 ];
 
 // Populated during init — maps group letter to template index
@@ -56,7 +56,7 @@ function getSchedule(group) {
 
 function buildPoteRow(groupLetter, pote, campos, template) {
     return `
-        <div class="pote-row" data-group="${groupLetter}" data-pote="${pote.num}">
+        <div class="pote-row" data-group="${groupLetter}" data-pote="${pote.num}" data-nivel="${pote.nivel}">
             <div class="pote-main">
                 <div class="pote-header">${pote.label}</div>
                 <div class="games-container">
@@ -353,6 +353,33 @@ function attachListeners() {
     });
 }
 
+// ── Level filter ──
+
+function applyFilter() {
+    const active = new Set(
+        [...document.querySelectorAll('.filter-btn.active')].map(b => b.dataset.nivel)
+    );
+
+    document.querySelectorAll('.pote-row[data-nivel]').forEach(row => {
+        row.classList.toggle('nivel-hidden', !active.has(row.dataset.nivel));
+    });
+
+    document.querySelectorAll('.group-card').forEach(card => {
+        const hasVisible = [...card.querySelectorAll('.pote-row')].some(r => !r.classList.contains('nivel-hidden'));
+        card.classList.toggle('nivel-hidden', !hasVisible);
+    });
+}
+
+function initFilter() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            applyFilter();
+        });
+    });
+    applyFilter();
+}
+
 // ── Admin bar ──
 
 function renderAdminBar() {
@@ -388,6 +415,7 @@ async function init() {
     });
 
     renderAdminBar();
+    initFilter();
     attachListeners();
     watchVagas();
     watchSchedules();

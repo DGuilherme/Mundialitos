@@ -78,6 +78,58 @@ body {
     letter-spacing: 1px;
 }
 
+/* ── Level filter ── */
+
+.nivel-hidden { display: none !important; }
+
+.level-filter {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.filter-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    padding: 7px 18px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.15s;
+}
+
+.filter-btn.active {
+    background: var(--neon);
+    border-color: var(--neon);
+    color: black;
+}
+
+.filter-btn:not(.active):hover {
+    border-color: var(--gray);
+    color: var(--white);
+}
+
 .club-container {
     margin-bottom: 40px;
     width: 100%;
