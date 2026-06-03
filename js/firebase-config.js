@@ -1,11 +1,9 @@
-// Preenche com a config do teu projecto Firebase
-// (Definições do projecto → Aplicações web → SDK setup)
 export const firebaseConfig = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    databaseURL:       "https://YOUR_PROJECT-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId:         "YOUR_PROJECT",
-    storageBucket:     "YOUR_PROJECT.firebasestorage.app",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
+    apiKey:            "AIzaSyDOROOl32ZGrVDNMAScNH9IJGUP_NijU1Y",
+    authDomain:        "mundialitos.firebaseapp.com",
+    databaseURL:       "https://mundialitos-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId:         "mundialitos",
+    storageBucket:     "mundialitos.firebasestorage.app",
+    messagingSenderId: "783155313630",
+    appId:             "1:783155313630:web:44644ef245cb8bc337fb4f"
 };
