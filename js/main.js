@@ -38,6 +38,7 @@ function writeVaga(group, pote, data)  { return set(ref(db, `vagas/${dbKey(group
 function deleteVaga(group, pote)       { return remove(ref(db, `vagas/${dbKey(group, pote)}`)); }
 function writeSchedule(group, data)    { return set(ref(db, `schedules/${group}`), data); }
 function deleteSchedule(group)         { return remove(ref(db, `schedules/${group}`)); }
+function writeRegulamento(html)        { return set(ref(db, 'regulamento'), { html }); }
 
 // ── Utils ──
 
@@ -61,16 +62,16 @@ function buildPoteRow(groupLetter, pote, campos, template) {
                 <div class="pote-header">${pote.label}</div>
                 <div class="games-container">
                     <div class="game-box">
-                        <span data-group="${groupLetter}" data-jornada="j1">J1: ${template.j1}</span>
-                        <strong>Campo ${campos.c1}</strong>
+                        <strong>Jogo 1</strong>
+                        <span data-group="${groupLetter}" data-jornada="j1">${template.j1}</span>
                     </div>
                     <div class="game-box">
-                        <span data-group="${groupLetter}" data-jornada="j2">J2: ${template.j2}</span>
-                        <strong>Campo ${campos.c2}</strong>
+                        <strong>Jogo 2</strong>
+                        <span data-group="${groupLetter}" data-jornada="j2">${template.j2}</span>
                     </div>
                     <div class="game-box">
-                        <span data-group="${groupLetter}" data-jornada="j3">J3: ${template.j3}</span>
-                        <strong>Campo ${campos.c3}</strong>
+                        <strong>Jogo 3</strong>
+                        <span data-group="${groupLetter}" data-jornada="j3">${template.j3}</span>
                     </div>
                 </div>
                 <div class="btn-group">
@@ -184,10 +185,9 @@ function watchVagas() {
 // ── Real-time: schedules ──
 
 function applySchedule(group, schedule) {
-    const label = { j1: 'J1', j2: 'J2', j3: 'J3' };
     ['j1', 'j2', 'j3'].forEach(jornada => {
         document.querySelectorAll(`span[data-group="${group}"][data-jornada="${jornada}"]`).forEach(span => {
-            span.textContent = `${label[jornada]}: ${schedule[jornada]}`;
+            span.textContent = schedule[jornada];
         });
     });
 
@@ -371,9 +371,19 @@ function applyFilter() {
 }
 
 function initFilter() {
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    const btns = [...document.querySelectorAll('.filter-btn')];
+
+    btns.forEach(btn => {
         btn.addEventListener('click', () => {
-            btn.classList.toggle('active');
+            const isSoleActive = btn.classList.contains('active') &&
+                btns.filter(b => b.classList.contains('active')).length === 1;
+
+            if (isSoleActive) {
+                btns.forEach(b => b.classList.add('active'));
+            } else {
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
             applyFilter();
         });
     });
@@ -399,6 +409,87 @@ function renderAdminBar() {
     }
 }
 
+// ── Regulamento & Prémios ──
+
+function watchRegulamento() {
+    onValue(ref(db, 'regulamento'), snapshot => {
+        const data    = snapshot.val();
+        const display = document.getElementById('regulamento-display');
+        if (display) display.innerHTML = data?.html || '<p class="reg-empty">Conteúdo em breve…</p>';
+    });
+}
+
+function renderRegulamentoAdmin() {
+    const container = document.getElementById('regulamento-admin');
+    if (!container || !isAdmin) return;
+
+    container.innerHTML = `
+        <button class="btn-edit-reg" id="btn-open-reg-editor">✎ Editar</button>
+        <div class="rte-wrap hidden" id="rte-wrap">
+            <div class="rte-toolbar">
+                <button type="button" class="rte-btn" data-cmd="bold"                title="Negrito"><b>B</b></button>
+                <button type="button" class="rte-btn" data-cmd="italic"              title="Itálico"><i>I</i></button>
+                <button type="button" class="rte-btn" data-cmd="underline"           title="Sublinhado"><u>U</u></button>
+                <span class="rte-sep"></span>
+                <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Lista">&#8226; Lista</button>
+                <button type="button" class="rte-btn" data-cmd="insertOrderedList"   title="Lista numerada">1. Lista</button>
+                <span class="rte-sep"></span>
+                <button type="button" class="rte-btn" data-cmd="removeFormat"        title="Remover formatação">&#10005; Formato</button>
+            </div>
+            <div class="rte-editor" id="rte-editor" contenteditable="true"></div>
+            <div class="rte-actions">
+                <button type="button" class="btn-confirm" id="btn-save-reg">Guardar</button>
+                <button type="button" class="btn-cancel"  id="btn-cancel-reg">Cancelar</button>
+            </div>
+        </div>`;
+
+    const openBtn  = document.getElementById('btn-open-reg-editor');
+    const wrap     = document.getElementById('rte-wrap');
+    const editor   = document.getElementById('rte-editor');
+    const saveBtn  = document.getElementById('btn-save-reg');
+    const cancelBtn = document.getElementById('btn-cancel-reg');
+
+    openBtn.addEventListener('click', () => {
+        const current = document.getElementById('regulamento-display').innerHTML;
+        editor.innerHTML = current.includes('reg-empty') ? '' : current;
+        wrap.classList.remove('hidden');
+        openBtn.classList.add('hidden');
+        editor.focus();
+    });
+
+    wrap.querySelectorAll('.rte-btn[data-cmd]').forEach(btn => {
+        btn.addEventListener('mousedown', e => {
+            e.preventDefault();
+            document.execCommand(btn.dataset.cmd, false, null);
+            editor.focus();
+        });
+    });
+
+    saveBtn.addEventListener('click', () => {
+        const html = editor.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'A guardar…';
+        writeRegulamento(html)
+            .then(() => {
+                wrap.classList.add('hidden');
+                openBtn.classList.remove('hidden');
+            })
+            .catch(err => {
+                console.error('Erro ao guardar regulamento:', err);
+                alert('Erro ao guardar. Verifica as permissões do Firebase.');
+            })
+            .finally(() => {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Guardar';
+            });
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        wrap.classList.add('hidden');
+        openBtn.classList.remove('hidden');
+    });
+}
+
 // ── Bootstrap ──
 
 async function init() {
@@ -419,6 +510,8 @@ async function init() {
     attachListeners();
     watchVagas();
     watchSchedules();
+    watchRegulamento();
+    renderRegulamentoAdmin();
 }
 
 init();

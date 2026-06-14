@@ -14,51 +14,76 @@
         <p>CALENDÁRIO OFICIAL &bull; 48 EQUIPAS &bull; 12 GRUPOS &bull; ESCOLHA A SUA VAGA</p>
     </div>
 
-    <div class="level-filter">
-        <span class="filter-label">NÍVEL</span>
-        <div class="filter-btns">
-            <button class="filter-btn active" data-nivel="M3">M3</button>
-            <button class="filter-btn active" data-nivel="M4">M4</button>
-            <button class="filter-btn active" data-nivel="M5">M5</button>
-            <button class="filter-btn active" data-nivel="M6">M6</button>
+    <div class="main-tabs" id="mainTabs">
+        <button class="main-tab active" data-target="tab-calendario">CALENDÁRIO</button>
+        <button class="main-tab" data-target="tab-regulamento">REGULAMENTO &amp; PRÉMIOS</button>
+    </div>
+
+    <div class="main-tab-panel active" id="tab-calendario">
+
+        <div class="level-filter">
+            <span class="filter-label">NÍVEL</span>
+            <div class="filter-btns">
+                <button class="filter-btn active" data-nivel="M3">M3</button>
+                <button class="filter-btn active" data-nivel="M4">M4</button>
+                <button class="filter-btn active" data-nivel="M5">M5</button>
+                <button class="filter-btn active" data-nivel="M6">M6</button>
+            </div>
         </div>
-    </div>
 
-    <div class="club-container">
-        <div class="club-label">CESARPADEL (CAMPOS 1-3) <span class="club-dates">3 — 12 JUL</span></div>
-        <div class="grid" id="grid-a"></div>
-    </div>
-
-    <div class="club-container">
-        <div class="club-label">KINHAS SPORT (CAMPOS 4-6) <span class="club-dates">3 — 12 JUL</span></div>
-        <div class="grid" id="grid-b"></div>
-    </div>
-
-    <div class="phases-section">
-        <div class="phases-title">FASES ELIMINATÓRIAS</div>
-        <div class="phase-tabs" id="phaseTabs">
-            <button class="phase-tab active" data-target="phase-knockout">16AVOS &amp; 8AVOS</button>
-            <button class="phase-tab" data-target="phase-semis">MEIAS FINAIS</button>
-            <button class="phase-tab" data-target="phase-final">FINAL</button>
+        <div class="club-container">
+            <div class="club-label">CESARPADEL (CAMPOS 1-3) <span class="club-dates">3 — 12 JUL</span></div>
+            <div class="grid" id="grid-a"></div>
         </div>
-        <div class="phase-panels">
-            <div class="phase-panel active" id="phase-knockout">
-                <div class="phase-dates">18 — 24 JULHO</div>
-                <div class="phase-desc">16 Avos e Oitavos de Final &bull; Sextas e Sábados</div>
+
+        <div class="club-container">
+            <div class="club-label">KINHAS SPORT (CAMPOS 4-6) <span class="club-dates">3 — 12 JUL</span></div>
+            <div class="grid" id="grid-b"></div>
+        </div>
+
+        <div class="phases-section">
+            <div class="phases-title">FASES ELIMINATÓRIAS</div>
+            <div class="phase-tabs" id="phaseTabs">
+                <button class="phase-tab active" data-target="phase-knockout">16AVOS &amp; 8AVOS</button>
+                <button class="phase-tab" data-target="phase-semis">MEIAS FINAIS</button>
+                <button class="phase-tab" data-target="phase-final">FINAL</button>
             </div>
-            <div class="phase-panel" id="phase-semis">
-                <div class="phase-dates">25 — 30 JULHO</div>
-                <div class="phase-desc">Meias Finais &bull; Sextas e Sábados</div>
+            <div class="phase-panels">
+                <div class="phase-panel active" id="phase-knockout">
+                    <div class="phase-dates">18 — 24 JULHO</div>
+                    <div class="phase-desc">16 Avos e Oitavos de Final &bull; Sextas e Sábados</div>
+                </div>
+                <div class="phase-panel" id="phase-semis">
+                    <div class="phase-dates">25 — 30 JULHO</div>
+                    <div class="phase-desc">Meias Finais &bull; Sextas e Sábados</div>
+                </div>
+                <div class="phase-panel" id="phase-final">
+                    <div class="phase-dates">1 AGOSTO</div>
+                    <div class="phase-desc">Grande Final</div>
+                </div>
             </div>
-            <div class="phase-panel" id="phase-final">
-                <div class="phase-dates">1 AGOSTO</div>
-                <div class="phase-desc">Grande Final</div>
-            </div>
+        </div>
+
+    </div>
+
+    <div class="main-tab-panel" id="tab-regulamento">
+        <div class="regulamento-section">
+            <div id="regulamento-display" class="regulamento-content"></div>
+            <div id="regulamento-admin"></div>
         </div>
     </div>
 
     <script src="js/main.js" type="module"></script>
     <script>
+        document.getElementById('mainTabs').addEventListener('click', function(e) {
+            var tab = e.target.closest('.main-tab');
+            if (!tab) return;
+            document.querySelectorAll('.main-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.main-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.target).classList.add('active');
+        });
+
         document.getElementById('phaseTabs').addEventListener('click', function(e) {
             var tab = e.target.closest('.phase-tab');
             if (!tab) return;

@@ -428,8 +428,8 @@ body {
     flex: 1;
 }
 
-.game-box span { color: var(--gray); font-size: 0.65rem; margin-bottom: 2px; }
-.game-box strong { color: var(--white); font-size: 0.8rem; white-space: nowrap; }
+.game-box strong { color: var(--neon); font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
+.game-box span { color: var(--white); font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
 .game-box em { color: var(--neon); font-style: normal; font-size: 0.6rem; font-weight: 700; margin-top: 3px; }
 
 .btn-group {
@@ -554,6 +554,188 @@ body {
     color: var(--gray);
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* ── Main tabs (Calendário / Regulamento) ── */
+
+.main-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+}
+
+.main-tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--gray);
+    font-family: 'Syncopate', sans-serif;
+    font-size: clamp(0.6rem, 2vw, 0.75rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+}
+
+.main-tab:hover { color: var(--white); }
+
+.main-tab.active {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--neon);
+    border-bottom-color: var(--card);
+}
+
+.main-tab-panel { display: none; }
+.main-tab-panel.active { display: block; }
+
+/* ── Regulamento & Prémios ── */
+
+.regulamento-section {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.regulamento-content {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 30px 35px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--white);
+    min-height: 120px;
+}
+
+.regulamento-content .reg-empty {
+    color: var(--gray);
+    font-style: italic;
+    text-align: center;
+}
+
+.regulamento-content h1,
+.regulamento-content h2,
+.regulamento-content h3 {
+    font-family: 'Syncopate', sans-serif;
+    color: var(--neon);
+    margin-bottom: 12px;
+    margin-top: 20px;
+}
+
+.regulamento-content h1 { font-size: 1.2rem; }
+.regulamento-content h2 { font-size: 1rem; }
+.regulamento-content h3 { font-size: 0.85rem; }
+
+.regulamento-content p { margin-bottom: 10px; }
+
+.regulamento-content ul,
+.regulamento-content ol {
+    padding-left: 22px;
+    margin-bottom: 10px;
+}
+
+.regulamento-content li { margin-bottom: 4px; }
+
+.regulamento-content strong { color: var(--neon); }
+
+.btn-edit-reg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 14px;
+}
+
+.btn-edit-reg:hover { border-color: var(--neon); color: var(--neon); }
+.btn-edit-reg.hidden { display: none; }
+
+/* ── Rich text editor ── */
+
+.rte-wrap {
+    margin-top: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.rte-wrap.hidden { display: none; }
+
+.rte-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: #0d0d0d;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.rte-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+}
+
+.rte-btn:hover,
+.rte-btn:focus {
+    border-color: var(--neon);
+    color: var(--neon);
+    outline: none;
+}
+
+.rte-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 4px;
+}
+
+.rte-editor {
+    min-height: 220px;
+    padding: 20px 24px;
+    outline: none;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--white);
+}
+
+.rte-editor:focus { background: #0a0a0a; }
+
+.rte-editor strong { color: var(--neon); }
+
+.rte-editor ul,
+.rte-editor ol { padding-left: 22px; }
+
+.rte-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    background: #0d0d0d;
 }
 
 @media print {
